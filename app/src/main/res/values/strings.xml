@@ -1,6 +1,8 @@
 <resources>
-    <string name="app_name">Millenials</string>
+    <string name="app_name">Collide</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="action_rewards">Rewards</string>
+    <string name="facebook_app_id">997607490306728</string>
 </resources>

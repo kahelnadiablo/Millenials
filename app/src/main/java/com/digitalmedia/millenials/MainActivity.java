@@ -6,37 +6,51 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
-import android.nfc.NdefMessage;
-import android.nfc.NdefRecord;
-import android.nfc.NfcAdapter;
-import android.nfc.NfcEvent;
 import android.os.Environment;
-import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.digitalmedia.millenials.presenter.ArticlesPresenter;
+import com.digitalmedia.millenials.model.Song;
+import com.digitalmedia.millenials.presenter.SongPresenter;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.rebound.Spring;
+import com.facebook.rebound.SpringConfig;
+import com.facebook.rebound.SpringSystem;
+import com.facebook.share.Sharer;
+import com.facebook.share.model.ShareLinkContent;
+import com.facebook.share.widget.ShareDialog;
 
 import java.io.File;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
-public class MainActivity extends AppCompatActivity implements NfcAdapter.CreateNdefMessageCallback, NfcAdapter.OnNdefPushCompleteCallback {
+public class MainActivity extends AppCompatActivity {
+
+    @Bind(R.id.toolbar) Toolbar toolbar;
+    @Bind(R.id.img_animated) ImageView animImageView;
+
+    @Bind(R.id.img_map) ImageView img_map;
+    @Bind(R.id.img_music) ImageView img_music;
+    @Bind(R.id.img_search) ImageView img_search;
+    @Bind(R.id.img_play) ImageView img_play;
+    @Bind(R.id.img_link) ImageView img_link;
 
 
-    @Bind(R.id.info) TextView textInfo;
-    @Bind(R.id.textout) EditText textOut;
-
-    NfcAdapter nfcAdapter;
+    CallbackManager callbackManager;
+    ShareDialog shareDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,21 +59,98 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Create
 
         ButterKnife.bind(this);
 
-        ArticlesPresenter articlesPresenter = new ArticlesPresenter(getBaseContext());
-        articlesPresenter.getArticles();
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        FacebookSdk.sdkInitialize(this);
+        callbackManager = CallbackManager.Factory.create();
+        shareDialog = new ShareDialog(this);
+        // this part is optional
+        shareDialog.registerCallback(callbackManager, new FacebookCallback<Sharer.Result>() {
+            @Override
+            public void onSuccess(Sharer.Result result) {
+                if (result.getPostId() != null) {
+                    Toast.makeText(getBaseContext(), "Success", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getBaseContext(), "Problem posting story", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancel() {
+                Toast.makeText(getBaseContext(), "Cancelled", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(FacebookException e) {
+                Toast.makeText(getBaseContext(), "Error sharing", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        animImageView.setBackgroundResource(R.drawable.anim_image);
+        animImageView.post(new Runnable() {
+            @Override
+            public void run() {
+                AnimationDrawable frameAnimation =
+                        (AnimationDrawable) animImageView.getBackground();
+                frameAnimation.start();
+            }
+        });
+
+        SongPresenter songPresenter = new SongPresenter(getBaseContext(),this);
+        songPresenter.getSong();
 
 
-        downloadManager();
-        StartDownload();
+        //downloadManager();
+        //StartDownload();
+    }
 
-        nfcAdapter = NfcAdapter.getDefaultAdapter(this);
-        if(nfcAdapter==null){
-            Toast.makeText(MainActivity.this, "nfcAdapter==null, no NFC adapter exists", Toast.LENGTH_LONG).show();
-        }else{
-            Toast.makeText(MainActivity.this, "Set Callback(s)", Toast.LENGTH_LONG).show();
-            nfcAdapter.setNdefPushMessageCallback(this, this);
-            nfcAdapter.setOnNdefPushCompleteCallback(this, this);
+
+    @OnClick(R.id.img_logo)
+    public void facebookShare(){
+        if (ShareDialog.canShow(ShareLinkContent.class)) {
+            ShareLinkContent content = new ShareLinkContent.Builder()
+                    .setContentUrl(Uri.parse("http://collide.com"))
+                    .setContentDescription("I unlocked the secret")
+                    .setContentTitle("I unlocked the secret")
+                    .setImageUrl(Uri.parse("http://piq.codeus.net/static/media/userpics/piq_95284_400x400.png"))
+                    .build();
+
+            shareDialog.show(this, content);
         }
+    }
+
+    @OnClick(R.id.img_map)
+    public void mapClicked(){
+        //todo show map activity
+    }
+
+    @OnClick(R.id.img_music)
+    public void musicClicked(){
+        //todo show music activity
+    }
+
+    @OnClick(R.id.img_search)
+    public void searchClicked(){
+        //todo show search activity
+    }
+
+    @OnClick(R.id.img_play)
+    public void playClicked(){
+        //todo show play activity
+    }
+
+    @OnClick(R.id.img_link)
+    public void linkClicked(){
+        //todo show link activity
+    }
+
+    public void DisplaySongInformation(Song song){
+        Log.e("Test", song.getArtist());
+        Log.e("Test", song.getLink());
+        Log.e("Test", song.getNote());
+        Log.e("Test", song.getTitle());
+        Log.e("Test", song.getLyrics());
     }
 
     @Override
@@ -83,6 +174,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Create
 
         return super.onOptionsItemSelected(item);
     }
+
 
     private long enqueue;
     private DownloadManager dm;
@@ -135,57 +227,4 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Create
         enqueue = dm.enqueue(request);
     }
 
-
-    /*NFC*/
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Intent intent = getIntent();
-        String action = intent.getAction();
-        if(action.equals(NfcAdapter.ACTION_NDEF_DISCOVERED)){
-            Parcelable[] parcelables =
-                    intent.getParcelableArrayExtra(
-                            NfcAdapter.EXTRA_NDEF_MESSAGES);
-            NdefMessage inNdefMessage = (NdefMessage)parcelables[0];
-            NdefRecord[] inNdefRecords = inNdefMessage.getRecords();
-            NdefRecord NdefRecord_0 = inNdefRecords[0];
-            String inMsg = new String(NdefRecord_0.getPayload());
-            textInfo.setText(inMsg);
-        }
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        setIntent(intent);
-    }
-
-    @Override
-    public void onNdefPushComplete(NfcEvent event) {
-        final String eventString = "onNdefPushComplete\n" + event.toString();
-        runOnUiThread(new Runnable() {
-
-            @Override
-            public void run() {
-                Toast.makeText(getApplicationContext(), eventString, Toast.LENGTH_LONG).show();
-            }
-        });
-
-    }
-
-    @Override
-    public NdefMessage createNdefMessage(NfcEvent event) {
-
-        String stringOut = textOut.getText().toString();
-        byte[] bytesOut = stringOut.getBytes();
-
-        NdefRecord ndefRecordOut = new NdefRecord(
-                NdefRecord.TNF_MIME_MEDIA,
-                "text/plain".getBytes(),
-                new byte[] {},
-                bytesOut);
-
-        NdefMessage ndefMessageout = new NdefMessage(ndefRecordOut);
-        return ndefMessageout;
-    }
-    /*NFC END*/
 }
