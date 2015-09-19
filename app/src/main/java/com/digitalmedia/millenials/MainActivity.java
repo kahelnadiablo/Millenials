@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
@@ -18,8 +19,10 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.digitalmedia.millenials.activities.Discover;
 import com.digitalmedia.millenials.model.Song;
 import com.digitalmedia.millenials.presenter.SongPresenter;
+import com.digitalmedia.millenials.utils.Utilities;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -32,6 +35,7 @@ import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.widget.ShareDialog;
 
 import java.io.File;
+import java.util.Random;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -97,18 +101,57 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        SongPresenter songPresenter = new SongPresenter(getBaseContext(),this);
-        songPresenter.getSong();
-
-
         //downloadManager();
         //StartDownload();
     }
 
 
-    @OnClick(R.id.img_logo)
+    @OnClick(R.id.img_animated)
+    public void getURL(){
+        Random r = new Random();
+        String url = "";
+
+        switch (r.nextInt(5)+1){
+            case 1:
+                url = "http://10.0.2.106/services/smells_like.json";
+                break;
+            case 2:
+                url = "http://10.0.2.106/services/smells_like.json";
+                break;
+            case 3:
+                url = "http://10.0.2.106/services/smells_like.json";
+                break;
+            case 4:
+                url = "http://10.0.2.106/services/smells_like.json";
+                break;
+            case 5:
+                url = "http://10.0.2.106/services/smells_like.json";
+                break;
+            default:
+                url = "http://10.0.2.106/services/smells_like.json";
+                break;
+        }
+
+        if(Utilities.isOnline(getBaseContext())){
+            SongPresenter songPresenter = new SongPresenter(getBaseContext(),this, url);
+            songPresenter.getSong();
+        }else{
+            SharedPreferences saved_link = getSharedPreferences("saved_link", MODE_PRIVATE);
+            Log.e("Test", "saved_link" + saved_link.getAll().size());
+            saved_link.edit().putString("saved_link" + saved_link.getAll().size(), url+ (r.nextInt(11-1)+1) ).apply();
+        }
+    }
+
+
+    //@OnClick(R.id.img_logo)
     public void facebookShare(){
-        if (ShareDialog.canShow(ShareLinkContent.class)) {
+        SharedPreferences saved_link = getSharedPreferences("saved_link", MODE_PRIVATE);
+        for(int i=0; i<saved_link.getAll().size();i++){
+            Log.e("The links", saved_link.getString("saved_link" + i, ""));
+        }
+
+
+        /*if (ShareDialog.canShow(ShareLinkContent.class)) {
             ShareLinkContent content = new ShareLinkContent.Builder()
                     .setContentUrl(Uri.parse("http://collide.com"))
                     .setContentDescription("I unlocked the secret")
@@ -117,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
                     .build();
 
             shareDialog.show(this, content);
-        }
+        }*/
     }
 
     @OnClick(R.id.img_map)
@@ -146,11 +189,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void DisplaySongInformation(Song song){
-        Log.e("Test", song.getArtist());
-        Log.e("Test", song.getLink());
-        Log.e("Test", song.getNote());
-        Log.e("Test", song.getTitle());
-        Log.e("Test", song.getLyrics());
+        Intent intent = new Intent(this, Discover.class);
+        intent.putExtra("artist", song.getArtist());
+        intent.putExtra("link", song.getLink());
+        intent.putExtra("note", song.getNote());
+        intent.putExtra("title", song.getTitle());
+        intent.putExtra("lyrics", song.getLyrics());
+        intent.putExtra("image_link", song.getImageLink());
+
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
     }
 
     @Override
@@ -175,56 +223,5 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
-    private long enqueue;
-    private DownloadManager dm;
-    BroadcastReceiver receiver;
-
-    private void downloadManager(){
-        receiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
-                    long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
-                    DownloadManager.Query query = new DownloadManager.Query();
-                    query.setFilterById(enqueue);
-                    Cursor c = dm.query(query);
-                    if (c.moveToFirst()) {
-                        int columnIndex = c
-                                .getColumnIndex(DownloadManager.COLUMN_STATUS);
-                        if (DownloadManager.STATUS_SUCCESSFUL == c.getInt(columnIndex)) {
-
-                            /*ImageView view = (ImageView) findViewById(R.id.imageView1);*/
-                            String uriString = c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
-                            /*view.setImageURI(Uri.parse(uriString));*/
-                            unregisterReceiver(receiver);
-                        }
-                    }
-                }
-            }
-        };
-
-        registerReceiver(receiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-    }
-
-    public void StartDownload() {
-
-        File mydownload = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+ "/Millenials");
-
-        if (!mydownload.exists()){
-            mydownload.mkdir();
-        }
-
-        dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-        DownloadManager.Request request = new DownloadManager.Request(Uri.parse("http://www.vogella.de/img/lars/LarsVogelArticle7.png"));
-        request.setAllowedNetworkTypes(
-                DownloadManager.Request.NETWORK_WIFI
-                        | DownloadManager.Request.NETWORK_MOBILE)
-                .setAllowedOverRoaming(false).setTitle("Millenials")
-                .setDescription("Test Description")
-                .setDestinationInExternalPublicDir("/Millenials", "test.jpg");
-        enqueue = dm.enqueue(request);
-    }
 
 }

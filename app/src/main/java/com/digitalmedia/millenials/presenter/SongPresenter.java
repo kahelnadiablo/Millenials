@@ -3,6 +3,7 @@ package com.digitalmedia.millenials.presenter;
 import android.content.Context;
 import android.util.Log;
 
+import com.android.volley.NetworkResponse;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
@@ -22,14 +23,16 @@ public class SongPresenter {
 
     MainActivity view;
     Context context;
+    String url;
 
-    public SongPresenter(Context context, MainActivity view) {
+    public SongPresenter(Context context, MainActivity view, String url) {
         this.context = context;
         this.view = view;
+        this.url = url;
     }
 
     public void getSong(){
-        StringRequest jsonObjectRequest = new StringRequest(GET, "http://10.0.2.106/services/smells_like.json",
+        StringRequest jsonObjectRequest = new StringRequest(GET, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -43,7 +46,10 @@ public class SongPresenter {
             @Override
             public void onErrorResponse(VolleyError error) {
                 error.printStackTrace();
+                NetworkResponse networkResponse = error.networkResponse;
+                if (networkResponse != null) {
                     Log.e("Response", "Error");
+                }
 
             }
         });

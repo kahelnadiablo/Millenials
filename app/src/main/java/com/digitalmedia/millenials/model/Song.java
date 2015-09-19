@@ -13,4 +13,5 @@ public class Song {
     @SerializedName("note") @Getter private String note;
     @SerializedName("lyrics") @Getter private String lyrics;
     @SerializedName("link") @Getter private String link;
+    @SerializedName("img_link") @Getter private String imageLink;
 }
