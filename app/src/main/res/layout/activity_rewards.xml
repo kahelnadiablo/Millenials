@@ -7,7 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/imageView3"
-        android:src="@drawable/img_discover"
+        android:src="@drawable/img_rewards"
         android:adjustViewBounds="false"
         android:scaleType="fitXY" />
 

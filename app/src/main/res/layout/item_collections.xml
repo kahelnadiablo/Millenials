@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingLeft="20dp"
+    android:paddingRight="20dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    android:background="@color/black">
+
+    <ImageView
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:id="@+id/img_album_art"
+        android:background="@color/white"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:layout_weight="1">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="Small Text"
+            android:id="@+id/txt_title"
+            android:textColor="@color/white"
+            android:layout_marginLeft="15dp"
+            android:textStyle="bold"
+            fontPath="fonts/Gotham-Book.ttf"
+            tools:ignore="MissingPrefix"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="Small Text"
+            android:id="@+id/txt_artist"
+            android:textColor="@color/white"
+            android:layout_marginLeft="15dp"
+            android:textSize="13dp"
+            fontPath="fonts/Gotham-Book.ttf"
+            tools:ignore="MissingPrefix"/>
+    </LinearLayout>
+
+    <CheckBox
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:button="@null"
+        android:id="@+id/btn_play"
+        android:checked="false"
+        android:background="@drawable/media_controller" />
+
+    <Button
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:id="@+id/btn_add"
+        android:background="@drawable/btn_add"
+        android:layout_marginLeft="10dp" />
+</LinearLayout>

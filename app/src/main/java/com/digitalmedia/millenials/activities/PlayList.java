@@ -15,7 +15,7 @@ import butterknife.ButterKnife;
 /**
  * Created by Digital Media on 9/19/2015.
  */
-public class Discover extends AppCompatActivity {
+public class PlayList extends AppCompatActivity {
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
@@ -25,7 +25,7 @@ public class Discover extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_discover);
+        setContentView(R.layout.activity_playlist);
 
         ButterKnife.bind(this);
 
@@ -33,7 +33,7 @@ public class Discover extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationIcon(R.drawable.icn_back);
-        title.setText("EXPLORE");
+        title.setText("PLAYLIST");
     }
 
     @Override

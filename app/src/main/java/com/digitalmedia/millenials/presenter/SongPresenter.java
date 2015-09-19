@@ -36,7 +36,6 @@ public class SongPresenter {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Log.e("Test", response);
                         Song song;
                         Gson gson = new Gson();
                         song = gson.fromJson(response.toString(), Song.class);

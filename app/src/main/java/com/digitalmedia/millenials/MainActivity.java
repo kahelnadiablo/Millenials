@@ -1,15 +1,9 @@
 package com.digitalmedia.millenials;
 
-import android.app.DownloadManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.graphics.drawable.AnimationDrawable;
-import android.net.Uri;
-import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -19,7 +13,12 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.digitalmedia.millenials.activities.Collections;
+import com.digitalmedia.millenials.activities.Capture;
 import com.digitalmedia.millenials.activities.Discover;
+import com.digitalmedia.millenials.activities.Links;
+import com.digitalmedia.millenials.activities.PlayList;
+import com.digitalmedia.millenials.activities.Rewards;
 import com.digitalmedia.millenials.model.Song;
 import com.digitalmedia.millenials.presenter.SongPresenter;
 import com.digitalmedia.millenials.utils.Utilities;
@@ -27,26 +26,22 @@ import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
-import com.facebook.rebound.Spring;
-import com.facebook.rebound.SpringConfig;
-import com.facebook.rebound.SpringSystem;
 import com.facebook.share.Sharer;
-import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.widget.ShareDialog;
 
-import java.io.File;
 import java.util.Random;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class MainActivity extends AppCompatActivity {
 
     @Bind(R.id.toolbar) Toolbar toolbar;
     @Bind(R.id.img_animated) ImageView animImageView;
 
-    @Bind(R.id.img_map) ImageView img_map;
     @Bind(R.id.img_music) ImageView img_music;
     @Bind(R.id.img_search) ImageView img_search;
     @Bind(R.id.img_play) ImageView img_play;
@@ -57,9 +52,20 @@ public class MainActivity extends AppCompatActivity {
     ShareDialog shareDialog;
 
     @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                        .setDefaultFontPath("fonts/Roboto-RobotoRegular.ttf")
+                        .setFontAttrId(R.attr.fontPath)
+                        .build()
+        );
 
         ButterKnife.bind(this);
 
@@ -110,25 +116,32 @@ public class MainActivity extends AppCompatActivity {
     public void getURL(){
         Random r = new Random();
         String url = "";
+        String song = "";
 
         switch (r.nextInt(5)+1){
             case 1:
                 url = "http://10.0.2.106/services/smells_like.json";
+                song = "Hataw Na - Gary V";
                 break;
             case 2:
-                url = "http://10.0.2.106/services/smells_like.json";
+                url = "http://10.0.2.106/services/inosente_lang.json";
+                song = "Blue Jeans - Apo Hiking Society";
                 break;
             case 3:
                 url = "http://10.0.2.106/services/smells_like.json";
+                song = "Kumot at unan - Apo Hiking Society";
                 break;
             case 4:
-                url = "http://10.0.2.106/services/smells_like.json";
+                url = "http://10.0.2.106/services/inosente_lang.json";
+                song = "Jeepney - Sponge Cola";
                 break;
             case 5:
                 url = "http://10.0.2.106/services/smells_like.json";
+                song = "Secrets - One Republic";
                 break;
             default:
-                url = "http://10.0.2.106/services/smells_like.json";
+                url = "http://10.0.2.106/services/inosente_lang.json";
+                song = "No reason - Sum 41";
                 break;
         }
 
@@ -137,8 +150,9 @@ public class MainActivity extends AppCompatActivity {
             songPresenter.getSong();
         }else{
             SharedPreferences saved_link = getSharedPreferences("saved_link", MODE_PRIVATE);
-            Log.e("Test", "saved_link" + saved_link.getAll().size());
-            saved_link.edit().putString("saved_link" + saved_link.getAll().size(), url+ (r.nextInt(11-1)+1) ).apply();
+            saved_link.edit().putString("saved_link" + saved_link.getAll().size(), song).apply();
+
+            Toast.makeText(getBaseContext(),"You are offline. Link saved.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -163,33 +177,49 @@ public class MainActivity extends AppCompatActivity {
         }*/
     }
 
-    @OnClick(R.id.img_map)
+    @OnClick(R.id.img_rewards)
     public void mapClicked(){
         //todo show map activity
+        Intent intent = new Intent(this, Rewards.class);
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
     }
 
     @OnClick(R.id.img_music)
     public void musicClicked(){
         //todo show music activity
+        Intent intent = new Intent(this, Collections.class);
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
     }
 
-    @OnClick(R.id.img_search)
+    @OnClick({R.id.img_search, R.id.img_discover})
     public void searchClicked(){
         //todo show search activity
+        Intent intent = new Intent(this, Discover.class);
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
+
     }
 
     @OnClick(R.id.img_play)
     public void playClicked(){
         //todo show play activity
+        Intent intent = new Intent(this, PlayList.class);
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
     }
 
     @OnClick(R.id.img_link)
     public void linkClicked(){
         //todo show link activity
+        Intent intent = new Intent(this, Links.class);
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
     }
 
     public void DisplaySongInformation(Song song){
-        Intent intent = new Intent(this, Discover.class);
+        Intent intent = new Intent(this, Capture.class);
         intent.putExtra("artist", song.getArtist());
         intent.putExtra("link", song.getLink());
         intent.putExtra("note", song.getNote());
